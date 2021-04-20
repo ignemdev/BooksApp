@@ -12,7 +12,7 @@ namespace Books.Core.Services
         Task<IEnumerable<Book>> GetBooks();
         Task<Book> GetBookById(int id);
         Task<Book> CreateBook(Book book);
-        Task UpdateBook(Book book);
-        Task DeleteBook(Book book);
+        Task<Book> UpdateBook(int id, Book book);
+        Task DeleteBook(int id);
     }
 }

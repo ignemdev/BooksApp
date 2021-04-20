@@ -1,10 +1,12 @@
 ﻿using Books.Core.Models;
 using Books.Core.Services;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Books.Services
@@ -12,32 +14,63 @@ namespace Books.Services
     public class BookService : IBookService
     {
         private readonly IHttpClientFactory _clientFactory;
+        private readonly HttpClient _client;
 
-        public BookService(IHttpClientFactory clientFactory) => _clientFactory = clientFactory;
-
-        public Task<IEnumerable<Book>> GetBooks()
-        {
-            throw new NotImplementedException();
+        public BookService(IHttpClientFactory clientFactory){
+            _clientFactory = clientFactory;
+            _client = _clientFactory.CreateClient("fakeApi");
         }
 
-        public Task<Book> CreateBook(Book book)
+        public async Task<IEnumerable<Book>> GetBooks()
         {
-            throw new NotImplementedException();
+            var response = await _client.GetAsync("Books");
+
+            response.EnsureSuccessStatusCode();
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+            var books = JsonConvert.DeserializeObject<IEnumerable<Book>>(jsonString);
+            return books;
         }
 
-        public Task<Book> GetBookById(int id)
+        public async Task<Book> CreateBook(Book newBook)
         {
-            throw new NotImplementedException();
+            var httpContent = new StringContent(JsonConvert.SerializeObject(newBook), Encoding.UTF8, "application/json");
+            var response = await _client.PostAsync("Books", httpContent);
+
+            response.EnsureSuccessStatusCode();
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+            var book = JsonConvert.DeserializeObject<Book>(jsonString);
+            return book;
         }
 
-        public Task DeleteBook(Book book)
+        public async Task<Book> GetBookById(int id)
         {
-            throw new NotImplementedException();
+            var response = await _client.GetAsync($"Books/{id}");
+
+            response.EnsureSuccessStatusCode();
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+            var book = JsonConvert.DeserializeObject<Book>(jsonString);
+            return book;
         }
 
-        public Task UpdateBook(Book book)
+        public async Task<Book> UpdateBook(int id, Book book)
         {
-            throw new NotImplementedException();
+            var httpContent = new StringContent(JsonConvert.SerializeObject(book), Encoding.UTF8, "application/json");
+            var response = await _client.PutAsync($"Books/{id}", httpContent);
+
+            response.EnsureSuccessStatusCode();
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+            var updatedBook = JsonConvert.DeserializeObject<Book>(jsonString);
+            return updatedBook;
+        }
+
+        public async Task DeleteBook(int id)
+        {
+            var response = await _client.DeleteAsync($"Books/{id}");
+            response.EnsureSuccessStatusCode();
         }
     }
 }
