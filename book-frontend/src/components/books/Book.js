@@ -111,6 +111,7 @@ export class Book extends Component {
         return (
             <section>
                 <Snackbar
+                    className="bg-danger"
                     anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                     open={this.state.snackbarOpen} autoHideDuration={6000} onClose={this.snackbarClose}
                     message={<span>{this.state.snackbarStatus} - {this.state.snackbarMessage}</span>}
