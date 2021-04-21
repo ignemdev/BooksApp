@@ -5,6 +5,7 @@ import { Button, ButtonToolbar } from 'react-bootstrap';
 
 import { AddBookModal } from './AddBookModal';
 import { EditBookModal } from './EditBookModal';
+import { DetailsBookModal } from './DetailsBookModal';
 
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -17,6 +18,7 @@ export class Book extends Component {
             books: [],
             addModalShow: false,
             editModalShow: false,
+            detailsModalShow: false,
             listStatus: 0,
             snackbarOpen: false,
             snackbarMessage: '',
@@ -79,10 +81,11 @@ export class Book extends Component {
     }
 
     render() {
-        const { books, bookToUpdate } = this.state;
+        const { books, bookToUpdate, bookDetails } = this.state;
 
         let addModalClose = () => this.setState({ addModalShow: false });
         let editModalClose = () => this.setState({ editModalShow: false });
+        let detailsModalClose = () => this.setState({ detailsModalShow: false });
         let BookChange = () => this.refreshList();
 
         return (
@@ -125,6 +128,11 @@ export class Book extends Component {
                                             onHide={editModalClose}
                                             onBookEdited={BookChange} />
                                         <Button size="sm" variant="danger" className="mx-2" onClick={() => this.deleteBook(book.id)}>Delete</Button>
+                                        <Button size="sm" variant="dark" className="mx-2" onClick={() => this.setState({ detailsModalShow: true, bookDetails: book })}>Details</Button>
+                                        <DetailsBookModal
+                                            book={bookDetails}
+                                            show={this.state.detailsModalShow}
+                                            onHide={detailsModalClose} />
                                     </ButtonToolbar>
                                 </td>
                             </tr>
