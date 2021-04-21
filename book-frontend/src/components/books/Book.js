@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
-import { Table, Spinner } from 'react-bootstrap';
-import { Button, ButtonToolbar } from 'react-bootstrap';
+import { Table, Spinner, Alert } from 'react-bootstrap';
+import { Button, ButtonToolbar, Form } from 'react-bootstrap';
 
 import { AddBookModal } from './AddBookModal';
 import { EditBookModal } from './EditBookModal';
@@ -20,8 +20,10 @@ export class Book extends Component {
             editModalShow: false,
             detailsModalShow: false,
             listStatus: 0,
+            snackbarStatus: 0,
             snackbarOpen: false,
             snackbarMessage: '',
+            isListOk: true
         }
     }
 
@@ -34,35 +36,40 @@ export class Book extends Component {
     }
 
     async refreshList() {
-        // let response = await fetch('https://localhost:44367/api/Books');
-        // let data = await response.json();
-        // let status = await response.status;
-        // this.setState({
-        //     books: data,
-        //     listStatus: status,
-        //     addModalShow: false
-        // })
+        let response = await fetch('https://localhost:44367/api/Books');
+        let data = await response.json();
+        let { ok, status } = await response;
         this.setState({
-            books: [
-                {
-                    "id": 1,
-                    "title": "string",
-                    "description": "string",
-                    "pageCount": 0,
-                    "excerpt": "string",
-                    "publishDate": "2021-04-21T04:38:17.715Z"
-                },
-                {
-                    "id": 2,
-                    "title": "string",
-                    "description": "string",
-                    "pageCount": 0,
-                    "excerpt": "string",
-                    "publishDate": "2021-04-21T04:38:17.715Z"
-                }
-            ],
+            books: (ok) ? data : [],
+            snackbarOpen: true,
+            snackbarStatus: status,
+            listStatus: status,
+            isListOk: ok,
+            snackbarMessage: (ok) ? 'Book list loaded successfully.' : data.message,
             addModalShow: false
         })
+        //Dummy data
+        // this.setState({
+        //     books: [
+        //         {
+        //             "id": 1,
+        //             "title": "string",
+        //             "description": "string",
+        //             "pageCount": 0,
+        //             "excerpt": "string",
+        //             "publishDate": "2021-04-21T04:38:17.715Z"
+        //         },
+        //         {
+        //             "id": 2,
+        //             "title": "string",
+        //             "description": "string",
+        //             "pageCount": 0,
+        //             "excerpt": "string",
+        //             "publishDate": "2021-04-21T04:38:17.715Z"
+        //         }
+        //     ],
+        //     addModalShow: false
+        // })
     }
 
     async deleteBook(id) {
@@ -75,13 +82,26 @@ export class Book extends Component {
         let { ok, status } = await response;
         this.setState({
             snackbarOpen: true,
-            listStatus: status,
+            snackbarStatus: status,
             snackbarMessage: data.message,
         })
     }
 
+    async searchBook(e) {
+        e.preventDefault();
+        let response = await fetch(`https://localhost:44367/api/Books/${e.target.BookId.value}`);
+        let data = await response.json();
+        let { ok, status } = await response;
+        this.setState({
+            books: (ok) ? [data] : this.state.books,
+            snackbarOpen: true,
+            snackbarStatus: status,
+            snackbarMessage: (ok) ? 'Book found.' : data.message ?? data.errors.id[0],
+        })
+    }
+
     render() {
-        const { books, bookToUpdate, bookDetails } = this.state;
+        const { books, bookToUpdate, bookDetails, listStatus, isListOk } = this.state;
 
         let addModalClose = () => this.setState({ addModalShow: false });
         let editModalClose = () => this.setState({ editModalShow: false });
@@ -93,7 +113,7 @@ export class Book extends Component {
                 <Snackbar
                     anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                     open={this.state.snackbarOpen} autoHideDuration={6000} onClose={this.snackbarClose}
-                    message={<span>{this.state.snackbarMessage} - {this.state.listStatus}</span>}
+                    message={<span>{this.state.snackbarStatus} - {this.state.snackbarMessage}</span>}
                     action={[
                         <IconButton key="close" color="inherit" onClick={this.snackBarClose}>x</IconButton>
                     ]}>
@@ -102,6 +122,23 @@ export class Book extends Component {
                     <Button className="mt-4" variant="success" onClick={() => this.setState({ addModalShow: true })}>Add Book</Button>
                     <AddBookModal show={this.state.addModalShow} onHide={addModalClose} onBookAdded={BookChange} />
                 </ButtonToolbar>
+                <Form inline className="mt-4" onSubmit={(e) => this.searchBook(e)}>
+                    <Form.Group>
+                        <Form.Control
+                            required
+                            type="int"
+                            id="BookId"
+                            Name="BookId"
+                            placeholder="Book Id"
+                        />
+                    </Form.Group>
+                    <Button variant="primary" type="submit" className="mx-1">
+                        Search
+                    </Button>
+                    <Button variant="danger" className="mx-1" onClick={async () => await this.refreshList()}>
+                        Cancel
+                    </Button>
+                </Form>
                 <Table striped bordered hover className="my-4">
                     <thead>
                         <tr>
@@ -139,9 +176,12 @@ export class Book extends Component {
                         ))}
                     </tbody>
                 </Table>
-                <div className={books.length <= 0 ? 'd-flex p-4 justify-content-center' : 'd-none'}>
+                <div className={(listStatus == 0) ? 'd-flex p-4 justify-content-center' : 'd-none'}>
                     <Spinner animation="grow" />
                 </div>
+                <Alert variant="danger" className={(isListOk) ? 'd-none' : 'd-block'}>
+                    An error has occurred while loading the books list.
+                </Alert>
             </section>
         )
     }

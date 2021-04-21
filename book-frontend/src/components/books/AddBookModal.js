@@ -53,7 +53,7 @@ export class AddBookModal extends Component {
                 <Snackbar
                     anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                     open={this.state.snackbarOpen} autoHideDuration={6000} onClose={this.snackbarClose}
-                    message={<span>{this.state.snackbarMessage} - {this.state.snackbarStatus}</span>}
+                    message={<span>{this.state.snackbarStatus} - {this.state.snackbarMessage}</span>}
                     action={[
                         <IconButton key="close" color="inherit" onClick={this.snackBarClose}>x</IconButton>
                     ]}>
