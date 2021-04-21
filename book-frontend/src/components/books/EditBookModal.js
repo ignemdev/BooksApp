@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import env from "react-dotenv";
 
 import { Modal, Button, Form } from 'react-bootstrap';
 
@@ -36,7 +37,7 @@ export class EditBookModal extends Component {
                 publishDate: e.target.excerpt.publishDate,
             })
         }
-        let response = await fetch(`https://localhost:44367/api/Books/${this.props.book?.id}`, request);
+        let response = await fetch(`${env.API_BASE}Books/${this.props.book?.id}`, request);
         let data = await response.json();
         let { ok, status } = await response;
         this.setState({

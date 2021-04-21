@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import env from "react-dotenv";
 
 import { Table, Spinner, Alert } from 'react-bootstrap';
 import { Button, ButtonToolbar, Form } from 'react-bootstrap';
@@ -36,7 +37,7 @@ export class Book extends Component {
     }
 
     async refreshList() {
-        let response = await fetch('https://localhost:44367/api/Books');
+        let response = await fetch(`${env.API_BASE}Books`);
         let data = await response.json();
         let { ok, status } = await response;
         this.setState({
@@ -77,7 +78,7 @@ export class Book extends Component {
             method: 'DELETE',
             headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
         }
-        let response = await fetch(`https://localhost:44367/api/Books/${id}`, request);
+        let response = await fetch(`${env.API_BASE}Books/${id}`, request);
         let data = await response.json();
         let { ok, status } = await response;
         this.setState({
@@ -89,7 +90,7 @@ export class Book extends Component {
 
     async searchBook(e) {
         e.preventDefault();
-        let response = await fetch(`https://localhost:44367/api/Books/${e.target.BookId.value}`);
+        let response = await fetch(`${env.API_BASE}Books/${e.target.BookId.value}`);
         let data = await response.json();
         let { ok, status } = await response;
         this.setState({
@@ -111,7 +112,6 @@ export class Book extends Component {
         return (
             <section>
                 <Snackbar
-                    className="bg-danger"
                     anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                     open={this.state.snackbarOpen} autoHideDuration={6000} onClose={this.snackbarClose}
                     message={<span>{this.state.snackbarStatus} - {this.state.snackbarMessage}</span>}
@@ -177,7 +177,7 @@ export class Book extends Component {
                         ))}
                     </tbody>
                 </Table>
-                <div className={(listStatus == 0) ? 'd-flex p-4 justify-content-center' : 'd-none'}>
+                <div className={(listStatus === 0) ? 'd-flex p-4 justify-content-center' : 'd-none'}>
                     <Spinner animation="grow" />
                 </div>
                 <Alert variant="danger" className={(isListOk) ? 'd-none' : 'd-block'}>
