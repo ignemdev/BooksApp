@@ -25,12 +25,11 @@ namespace Books.Api.Controllers
             try
             {
                 var books = await _bookService.GetBooks();
-
                 return Ok(books);
             }
             catch (HttpRequestException ex)
             {
-                return NotFound(new { message = "Books not found.", exception = ex.Message });
+                return StatusCode((int)ex.StatusCode,(new { message = ex.Message}));
             }
         }
 
@@ -38,8 +37,15 @@ namespace Books.Api.Controllers
         [ProducesResponseType(typeof(Book), 201)]
         public async Task<IActionResult> CreateBook([FromBody]Book book)
         {
-            var newBook = await _bookService.CreateBook(book);
-            return CreatedAtAction(nameof(CreateBook), newBook);
+            try
+            {
+                var newBook = await _bookService.CreateBook(book);
+                return CreatedAtAction(nameof(CreateBook), newBook);
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode((int)ex.StatusCode, (new { message = ex.Message }));
+            }
         }
 
         [HttpGet("{id}")]
@@ -55,7 +61,7 @@ namespace Books.Api.Controllers
             }
             catch (HttpRequestException ex)
             {
-                return NotFound(new { message = "Book not found.", exception = ex.Message});
+                return StatusCode((int)ex.StatusCode, (new { message  = ex.Message }));
             }
         }
 
@@ -63,21 +69,31 @@ namespace Books.Api.Controllers
         [ProducesResponseType(typeof(Book), 200)]
         public async Task<IActionResult> UpdateBook(int id, [FromBody]Book book)
         {
-            if ((id == 0) || (id != book.Id)) return BadRequest(new { message = "Invalid Id." });
-
-            var updatedBook = await _bookService.UpdateBook(id, book);
-
-            return Ok(updatedBook);
+            try
+            {
+                if ((id == 0) || (id != book.Id)) return BadRequest(new { message = "Invalid Id." });
+                var updatedBook = await _bookService.UpdateBook(id, book);
+                return Ok(updatedBook);
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode((int)ex.StatusCode, (new { message = ex.Message }));
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(int id)
         {
-            if (id == 0) return BadRequest(new { message = "Invalid Id." });
-
-            await _bookService.DeleteBook(id);
-
-            return Ok(new {message = "Book deleted succesfully."});
+            try
+            {
+                if (id == 0) return BadRequest(new { message = "Invalid Id." });
+                await _bookService.DeleteBook(id);
+                return Ok(new { message = "Book deleted succesfully." });
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode((int)ex.StatusCode, (new { message = ex.Message }));
+            }
         }
     }
 }

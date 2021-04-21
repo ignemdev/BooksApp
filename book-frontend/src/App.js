@@ -1,14 +1,23 @@
-import logo from './logo.svg';
 import './App.css';
 
-import Button from 'react-bootstrap/Button'
+import { Home } from './components/home/Home';
+import { Book } from './components/books/Book';
+import { Navigation } from './components/partials/Navigation';
+
+
+import { BrowserRouter, Route, Switch } from 'react-router-dom'
 
 function App() {
   return (
-    <div className="App">
-      <h1>Hola mundo klk</h1>
-      <Button variant="primary">Klk</Button>
-    </div>
+    <BrowserRouter>
+      <Navigation />
+      <main className="container">
+        <Switch>
+          <Route path='/' component={Home} exact />
+          <Route path='/books' component={Book} exact />
+        </Switch>
+      </main>
+    </BrowserRouter>
   );
 }
 
